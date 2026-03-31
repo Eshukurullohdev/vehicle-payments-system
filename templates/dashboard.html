@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Dashboard</h1>
+        
+    </nav>
+
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md p-6 hidden md:block">
+            <h2 class="text-lg font-semibold mb-4">Navigatsiya</h2>
+            <ul class="space-y-2">
+                <li><a href="{% url 'add_car' %}" class="block px-3 py-2 rounded hover:bg-blue-100 transition">Mashina qo'shish</a></li>
+                {% if request.user.is_staff %}
+                <li><a href="{% url 'add_payment' %}" class="block px-3 py-2 rounded hover:bg-blue-100 transition">To'lov qo'shish</a></li>
+                {% endif %}
+            </ul>
+        </aside>
+
+        <!-- Main content -->
+        <main class="flex-1 p-6">
+
+            <!-- User Info -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold mb-2">Salom, {{ request.user.phone }}</h2>
+                <p class="text-gray-700">Cashback: <span class="font-semibold">{{ request.user.cashback_balance }}</span></p>
+            </div>
+
+            {% if request.user.is_staff %}
+                <!-- Admin Panel -->
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Admin panel</h2>
+
+<form method="get" class="flex items-center space-x-2 mb-4">
+    <input type="text" name="q" placeholder="Mashina nomi / plate / telefon oxirgi 4 raqam" value="{{ query }}"
+           class="border rounded px-2 py-1 flex-1">
+    <select name="model" class="border rounded px-2 py-1">
+        <option value="">Barcha modellari</option>
+        {% for model_name in models_list %}
+            <option value="{{ model_name }}" {% if model_name == model_filter %}selected{% endif %}>
+                {{ model_name }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded">Filter</button>
+</form>
+                    <div class="mb-6 overflow-x-auto">
+                        <h3 class="font-semibold mb-2">Hamma mashinalar va to‘lovlar:</h3>
+                        <table class="min-w-full bg-white shadow rounded overflow-hidden">
+                            <thead class="bg-blue-500 text-white">
+                                <tr>
+                                    <th class="py-2 px-4 text-left">Mashina</th>
+                                    <th class="py-2 px-4 text-left">Ega</th>
+                                    <th class="py-2 px-4 text-left">Total to‘langan</th>
+                                    <th class="py-2 px-4 text-left">Total cashback</th>
+                                    <th class="py-2 px-4 text-left">Oxirgi to‘lov sanasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cp in car_payments %}
+                                <tr class="border-b hover:bg-gray-100">
+                                    <td class="py-2 px-4">{{ cp.car.model }} ({{ cp.car.plate_number }})</td>
+                                    <td class="py-2 px-4">{{ cp.owner.phone }}</td>
+                                    <td class="py-2 px-4">{{ cp.total_paid }}</td>
+                                    <td class="py-2 px-4">{{ cp.total_cashback }}</td>
+                                    <td class="py-2 px-4">
+                                        {% if cp.last_payment %}
+                                            {{ cp.last_payment.created_at }}
+                                        {% else %}
+                                            Hali to‘lov yo‘q
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="font-semibold mb-2">Jamg‘arma:</h3>
+                        <p class="bg-white shadow rounded p-4">{{ fund.total_amount }}</p>
+                    </div>
+                </section>
+
+            {% else %}
+                <!-- User Panel -->
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4">O‘z mashinalaringiz:</h2>
+                    <ul class="bg-white shadow rounded p-4 space-y-2">
+                        {% for car in cars %}
+                            <li class="border-b py-2 last:border-b-0">
+                                {{ car.model }} ({{ car.plate_number }}, {{ car.year }})
+                            </li>
+                        {% empty %}
+                            <li>Hali mashina qo‘shilmadi</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-xl font-semibold mb-4">O‘z to‘lovlaringiz:</h2>
+                    <ul class="bg-white shadow rounded p-4 space-y-2">
+                        {% for payment in payments %}
+                            <li class="border-b py-2 last:border-b-0">
+                                {{ payment.amount }} | Cashback: {{ payment.cashback }} | {{ payment.created_at }}
+                            </li>
+                        {% empty %}
+                            <li>Hali to‘lov qilinmadi</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+
+        </main>
+    </div>
+</body>
+</html>
