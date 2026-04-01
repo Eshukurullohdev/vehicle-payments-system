@@ -52,6 +52,11 @@ class Fund(models.Model):
     def __str__(self):
         return f"Fund: {self.total_amount}"
 
+from django.db import models
+from django.contrib.auth import get_user_model
+from django.apps import apps
+
+User = get_user_model()
 
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
@@ -62,7 +67,6 @@ class Payment(models.Model):
     def save(self, *args, **kwargs):
         # Cashback hisoblash
         self.cashback = calculate_cashback(self.amount)
-
         super().save(*args, **kwargs)  # Payment saqlanadi
 
         # User cashback balansi update

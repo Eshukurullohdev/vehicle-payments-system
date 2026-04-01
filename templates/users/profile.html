@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- TOP BAR -->
+    <div class="fixed top-0 left-0 right-0 bg-white shadow p-4 text-center font-bold z-50">
+        Profil
+    </div>
+
+    <!-- CONTENT -->
+    <div class="pt-16 pb-24 px-4">
+<!-- PROFILE INFO -->
+<div class="bg-white rounded-xl shadow p-4 text-center mb-4">
+
+    {% if request.user.profile_image %}
+        <img src="{{ request.user.profile_image.url }}" 
+             class="w-24 h-24 rounded-full mx-auto object-cover mb-3">
+    {% else %}
+        <div class="w-24 h-24 rounded-full bg-gray-300 mx-auto flex items-center justify-center mb-3">
+            👤
+        </div>
+    {% endif %}
+
+    <p class="font-semibold text-lg">{{ request.user.phone }}</p>
+
+    <!-- STATUS -->
+    <p class="text-sm mt-1">
+        {% if request.user.last_seen %}
+            🕒 Oxirgi kirish:
+            <span class="text-gray-600">
+                {{ request.user.last_seen }}
+            </span>
+        {% else %}
+            Hali tizimga kirmagan
+        {% endif %}
+    </p>
+
+    <!-- CASHBACK -->
+    <div class="mt-3 bg-green-100 text-green-700 py-2 px-4 rounded-xl inline-block">
+        💰 Cashback: {{ request.user.cashback_balance }}
+    </div>
+
+</div>
+        <!-- AVATAR -->
+
+
+        <!-- FORM -->
+        <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-4 space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit"
+                class="w-full bg-blue-500 text-white py-3 rounded-xl text-lg font-semibold">
+                Saqlash
+            </button>
+        </form>
+
+        <!-- ACTIONS -->
+        <div class="mt-4 space-y-2">
+            <a href="{% url 'password_change' %}"
+               class="block w-full text-center bg-yellow-400 py-3 rounded-xl font-semibold">
+               🔒 Parolni o‘zgartirish
+            </a>
+
+            <a href="{% url 'dashboard' %}"
+               class="block w-full text-center bg-gray-200 py-3 rounded-xl">
+               ⬅️ Dashboard
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

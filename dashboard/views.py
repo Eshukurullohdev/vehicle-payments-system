@@ -4,39 +4,56 @@ from cars.models import Car
 from payments.models import Payment, Fund
 from django.db.models import Q
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from cars.models import Car
+from payments.models import Payment, Fund
+from django.db.models import Q
+from collections import defaultdict
+from users.models import User
+
+from django.shortcuts import render
+from cars.models import Car
+from payments.models import Payment, Fund
+from django.db.models import Q
+
 @login_required
 def dashboard_view(request):
     user = request.user
-    query = request.GET.get('q', '')  # search query
-    model_filter = request.GET.get('model', '')  # filter dropdown
+    query = request.GET.get('q', '')
+    model_filter = request.GET.get('model', '')
 
     if user.is_staff:
-        cars = Car.objects.all().order_by('user__phone')
+        # Admin uchun userlar ro'yxati
+        users = User.objects.all()
+
+        # Har bir userga mashinalar ro'yxatini qo'shamiz
+        for u in users:
+            u.cars_list = u.cars.all()
+            if model_filter:
+                u.cars_list = u.cars_list.filter(model=model_filter)
+            if query:
+                u.cars_list = u.cars_list.filter(
+                    Q(model__icontains=query) |
+                    Q(plate_number__icontains=query)
+                )
+
+        # Car payments (filter qo'llash mumkin)
         car_payments = []
-
-        # Dropdown uchun barcha unique mashina modellari
-        models_list = Car.objects.values_list('model', flat=True).distinct()
-
+        cars = Car.objects.all()
+        if model_filter:
+            cars = cars.filter(model=model_filter)
+        if query:
+            cars = cars.filter(
+                Q(model__icontains=query) |
+                Q(plate_number__icontains=query) |
+                Q(user__phone__endswith=query)
+            )
         for car in cars:
-            # Filter by model
-            if model_filter and car.model != model_filter:
-                continue
-
-            # User telefon oxirgi 4 raqam bilan filter
-            if query and query.isdigit() and len(query) <= 4:
-                if not str(car.user.phone).endswith(query):
-                    continue
-
-            # Mashina modeli yoki plate bilan filter
-            if query and not (query.isdigit() and len(query) <= 4):
-                if query.lower() not in car.model.lower() and query.lower() not in car.plate_number.lower():
-                    continue
-
             payments = Payment.objects.filter(user=car.user)
             total_paid = sum(p.amount for p in payments)
             total_cashback = sum(p.cashback for p in payments)
             last_payment = payments.order_by('-created_at').first()
-
             car_payments.append({
                 'car': car,
                 'owner': car.user,
@@ -46,14 +63,15 @@ def dashboard_view(request):
             })
 
         fund = Fund.objects.first()
+
         context = {
+            'users': users,
             'car_payments': car_payments,
             'fund': fund,
             'query': query,
-            'models_list': models_list,
             'model_filter': model_filter,
+            'models_list': Car.objects.values_list('model', flat=True).distinct(),
         }
-
     else:
         # Oddiy user
         cars = user.cars.all()

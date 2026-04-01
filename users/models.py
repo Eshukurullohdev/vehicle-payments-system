@@ -21,9 +21,11 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=20, unique=True)
     cashback_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    full_name = models.CharField(max_length=100, blank=True, null=True)  # 👤
+    profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)  # 🖼
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-
+    last_seen = models.DateTimeField(null=True, blank=True)
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - User Detail</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+
+<!-- Header -->
+<div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-bold truncate">{{ user.full_name }} ({{ user.phone }})</h1>
+    {% if user.profile_image %}
+        <img src="{{ user.profile_image.url }}" class="w-12 h-12 rounded-full object-cover">
+    {% endif %}
+</div>
+
+<!-- Cashback balance -->
+<div class="bg-white p-4 rounded-xl shadow mb-4 flex justify-between items-center">
+    <span class="font-semibold">Cashback balansi:</span>
+    <span class="text-blue-600 font-bold">{{ user.cashback_balance }}</span>
+</div>
+
+<!-- Mashinalar -->
+<div class="bg-white p-4 rounded-xl shadow mb-4">
+    <h2 class="font-semibold mb-2">Mashinalari:</h2>
+    <ul class="space-y-2">
+        {% for car in cars %}
+        <li class="border-b py-2 last:border-b-0">{{ car.model }} ({{ car.plate_number }}, {{ car.year }})</li>
+        {% empty %}
+        <li class="text-gray-500">Hali mashina qo‘shilmagan</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- To‘lovlar -->
+<div class="bg-white p-4 rounded-xl shadow mb-4">
+    <h2 class="font-semibold mb-2">To‘lovlar:</h2>
+    <ul class="space-y-2">
+        {% for payment in payments %}
+        <li class="border-b py-2 last:border-b-0">
+            💰 {{ payment.amount }} | 🎁 Cashback: {{ payment.cashback }} | <span class="text-xs text-gray-500">{{ payment.created_at }}</span>
+        </li>
+        {% empty %}
+        <li class="text-gray-500">Hali to‘lov qilinmagan</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Cashback grafik -->
+<!-- Cashback grafik (Doughnut) -->
+<div class="bg-white p-4 rounded-xl shadow mb-4">
+    <h2 class="font-semibold mb-2">Cashback tarixi:</h2>
+    <div class="w-full flex justify-center">
+        <canvas id="cashbackChart" class="w-48 h-48 md:w-64 md:h-64"></canvas>
+    </div>
+</div>
+
+<script>
+const ctx = document.getElementById('cashbackChart');
+new Chart(ctx, {
+    type: 'doughnut', // Doughnut chart
+    data: {
+        labels: {{ history_labels|safe }},
+        datasets: [{
+            label: 'Cashback',
+            data: {{ history_data|safe }},
+            backgroundColor: [
+                'rgba(59,130,246,0.8)',
+                'rgba(96,165,250,0.8)',
+                'rgba(147,197,253,0.8)',
+                'rgba(191,219,254,0.8)',
+                'rgba(219,234,254,0.8)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: { size: 12 }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ' + context.raw;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
