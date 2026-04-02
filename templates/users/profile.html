@@ -26,7 +26,14 @@
             👤
         </div>
     {% endif %}
-
+{% with last_payment=payments.first %}
+    {% if last_payment %}
+        <div class="bg-blue-100 p-3 rounded-xl">
+            🛠 Oxirgi ish: <b>{{ last_payment.description }}</b><br>
+            🕒 {{ last_payment.created_at }}
+        </div>
+    {% endif %}
+{% endwith %}
     <p class="font-semibold text-lg">{{ request.user.phone }}</p>
 
     <!-- STATUS -->

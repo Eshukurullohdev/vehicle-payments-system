@@ -24,10 +24,10 @@ def dashboard_view(request):
     model_filter = request.GET.get('model', '')
 
     if user.is_staff:
-        # Admin uchun userlar ro'yxati
+        # 🔹 ADMIN: barcha userlar
         users = User.objects.all()
 
-        # Har bir userga mashinalar ro'yxatini qo'shamiz
+        # Har bir user uchun mashinalar va oxirgi ish
         for u in users:
             u.cars_list = u.cars.all()
             if model_filter:
@@ -37,45 +37,24 @@ def dashboard_view(request):
                     Q(model__icontains=query) |
                     Q(plate_number__icontains=query)
                 )
-
-        # Car payments (filter qo'llash mumkin)
-        car_payments = []
-        cars = Car.objects.all()
-        if model_filter:
-            cars = cars.filter(model=model_filter)
-        if query:
-            cars = cars.filter(
-                Q(model__icontains=query) |
-                Q(plate_number__icontains=query) |
-                Q(user__phone__endswith=query)
-            )
-        for car in cars:
-            payments = Payment.objects.filter(user=car.user)
-            total_paid = sum(p.amount for p in payments)
-            total_cashback = sum(p.cashback for p in payments)
-            last_payment = payments.order_by('-created_at').first()
-            car_payments.append({
-                'car': car,
-                'owner': car.user,
-                'total_paid': total_paid,
-                'total_cashback': total_cashback,
-                'last_payment': last_payment,
-            })
+            # Har bir mashina uchun oxirgi ish
+            for car in u.cars_list:
+                last_payment = Payment.objects.filter(car=car).order_by('-created_at').first()
+                car.last_description = last_payment.description if last_payment else "Ish yozilmagan"
 
         fund = Fund.objects.first()
-
         context = {
             'users': users,
-            'car_payments': car_payments,
             'fund': fund,
             'query': query,
             'model_filter': model_filter,
             'models_list': Car.objects.values_list('model', flat=True).distinct(),
         }
+
     else:
-        # Oddiy user
+        # 🔹 ODDIY USER
         cars = user.cars.all()
-        payments = user.payments.all()
+        payments = user.payments.all().order_by('-created_at')
         context = {
             'cars': cars,
             'payments': payments,

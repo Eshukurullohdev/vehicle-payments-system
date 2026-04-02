@@ -8,4 +8,4 @@ class PaymentForm(forms.ModelForm):
 
     class Meta:
         model = Payment
-        fields = ['amount', 'car']
+        fields = ['amount', 'car', 'description']  # description maydonini qo‘shamiz

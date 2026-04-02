@@ -61,9 +61,10 @@ User = get_user_model()
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
     cashback = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    car = models.ForeignKey('cars.Car', on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def save(self, *args, **kwargs):
         # Cashback hisoblash
         self.cashback = calculate_cashback(self.amount)
