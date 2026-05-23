@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mashina qo'shish</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Django form inputlarini stilizatsiya qilish */
+        .car-form p {
+            margin-bottom: 1.25rem;
+        }
+
+        .car-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 0.6rem;
+            margin-left: 0.5rem;
+        }
+
+        .car-form input, .car-form select {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            border: 2px solid #f1f5f9;
+            background-color: #ffffff;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .car-form input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background-color: #fff;
+        }
+
+        .car-form input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div class="fixed top-0 left-0 right-0 glass-nav p-4 flex items-center justify-between z-50">
+        <a href="{% url 'dashboard' %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-600 active:scale-90 transition">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h1 class="font-extrabold text-gray-800 tracking-tight text-center flex-1">Yangi mashina</h1>
+        <div class="w-10"></div> </div>
+
+    <main class="pt-24 px-5 max-w-md mx-auto">
+        
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-tr from-indigo-500 to-blue-600 rounded-[36px] shadow-xl shadow-indigo-100 mb-4 transform -rotate-3 transition-transform hover:rotate-0">
+                <i class="fas fa-car-side text-white text-4xl"></i>
+            </div>
+            <p class="text-gray-500 font-medium px-4 leading-relaxed">
+                Xizmat ko'rsatish tarixini yuritish uchun mashina ma'lumotlarini kiriting.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-7 border border-gray-50">
+            <form method="post" class="car-form">
+                {% csrf_token %}
+                
+                <div class="form-container">
+                    {{ form.as_p }}
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg shadow-gray-200 active:scale-[0.97] transition-all duration-200 text-lg flex items-center justify-center gap-2">
+                        <i class="fas fa-plus-circle text-sm opacity-60"></i> Ro'yxatga qo'shish
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-8 flex items-start gap-4 p-4 bg-indigo-50 rounded-3xl border border-indigo-100">
+            <div class="w-10 h-10 bg-white rounded-xl flex-shrink-0 flex items-center justify-center text-indigo-600 shadow-sm">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div>
+                <h4 class="text-xs font-black text-indigo-900 uppercase tracking-widest mb-1">Maslahat</h4>
+                <p class="text-[11px] text-indigo-700 font-medium leading-relaxed">
+                    Davlat raqamini (nomerni) kiritishda xato qilmaslikka harakat qiling, bu usta sizni tezroq topishiga yordam beradi.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

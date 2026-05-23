@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zapchastlar Boshqaruvi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        
+        .product-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+        .product-card:active { transform: scale(0.98); }
+        
+        .sold-overlay {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(2px);
+        }
+
+        .glass-badge {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 pb-24">
+    <a href="{% url 'dashboard' %}">
+        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mb-6 text-gray-500 hover:bg-gray-300 transition">
+            <i class="fas fa-arrow-left text-sm"></i>
+        </div>
+    </a>
+    <div class="flex items-center justify-between mb-8 px-1">
+        <div>
+            <h1 class="text-2xl font-black text-gray-900 tracking-tight">Ehtiyot qismlar</h1>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[2px] mt-1">Mening mahsulotlarim</p>
+        </div>
+        {% if request.user.is_staff %}
+        <a href="{% url 'add_product' %}" class="w-12 h-12 bg-gray-900 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all">
+            <i class="fas fa-plus text-lg"></i>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        {% for p in products %}
+        <div class="bg-white rounded-[28px] overflow-hidden shadow-sm border border-gray-100 product-card relative flex flex-col h-full">
+            
+            <div class="relative h-36 overflow-hidden">
+                <img src="{{ p.image.url }}" class="w-full h-full object-cover {% if p.is_sold %}grayscale-[0.5] opacity-80{% endif %}">
+                
+                {% if p.is_sold %}
+                <div class="absolute inset-0 sold-overlay flex items-center justify-center">
+                    <span class="bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg uppercase tracking-widest">Sotildi</span>
+                </div>
+                {% else %}
+                <div class="absolute top-2 left-2 glass-badge text-white text-[8px] font-bold px-2 py-1 rounded-lg uppercase tracking-tighter">
+                    Mavjud
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="p-4 flex flex-col flex-1">
+                <h3 class="font-bold text-gray-800 text-sm leading-tight line-clamp-2 min-h-[40px]">{{ p.name }}</h3>
+                
+                <div class="mt-2">
+                    <p class="text-emerald-600 font-black text-base">{{ p.price }} <span class="text-[10px] font-medium italic">so'm</span></p>
+                </div>
+<div class="mt-1 flex items-center gap-1.5 text-gray-500">
+
+   <a href="tel:{{ p.phone }}" class="flex items-center gap-1.5 text-gray-500">
+    <i class="fas fa-phone text-[10px]"></i>
+    <span class="text-[10px] font-semibold">
+        {{ p.phone }}
+    </span>
+</a>
+</div>
+                <div class="mt-3 flex items-center gap-1.5 opacity-50">
+                    <i class="fas fa-calendar-alt text-[10px]"></i>
+                    <span class="text-[10px] font-bold">{{ p.created_at|date:"d.m.Y" }}</span>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-50 grid grid-cols-3 gap-2">
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'edit_product' p.id %}" 
+                       class="h-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
+                        <i class="fas fa-pen-nib text-xs"></i>
+                    </a>
+
+                    <button onclick="toggleSold({{ p.id }}, this)"
+                            class="h-9 rounded-xl flex items-center justify-center transition-all shadow-sm
+                            {% if p.is_sold %}bg-emerald-50 text-emerald-600{% else %}bg-amber-50 text-amber-600{% endif %}">
+                        <i class="fas {% if p.is_sold %}fa-check-double{% else %}fa-tag{% endif %} text-xs"></i>
+                    </button>
+
+                    <button onclick="deleteProduct({{ p.id }}, this)"
+                            class="h-9 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-2 py-24 text-center">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-gray-200 text-3xl shadow-sm">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <p class="text-gray-400 font-bold text-sm uppercase tracking-widest">Mahsulotlar topilmadi</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function deleteProduct(id, btn) {
+            if (!confirm("O‘chirishni tasdiqlaysizmi?")) return;
+            fetch(`/users/products/delete/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": csrftoken }
+            })
+            .then(res => res.json())
+            .then(data => { if (data.success) btn.closest(".product-card").style.opacity = '0'; setTimeout(() => btn.closest(".product-card").remove(), 300); });
+        }
+
+        function toggleSold(id, btn) {
+            fetch(`/users/products/toggle/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": csrftoken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const icon = btn.querySelector('i');
+                if (data.is_sold) {
+                    btn.className = "h-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm";
+                    icon.className = "fas fa-check-double text-xs";
+                    location.reload(); // Status o'zgarganda UI butunlay yangilanishi (Badge chiqishi) uchun
+                } else {
+                    btn.className = "h-9 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shadow-sm";
+                    icon.className = "fas fa-tag text-xs";
+                    location.reload();
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        
+        .profile-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 32px;
+        }
+
+        /* Form styling for {{ form.as_p }} */
+        .edit-form p { margin-bottom: 1rem; }
+        .edit-form label { display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; margin-left: 0.5rem; }
+        .edit-form input { 
+            width: 100%; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0; 
+            outline: none; transition: all 0.3s; background: white;
+        }
+        .edit-form input:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+        
+        /* Maxsus fayl yuklash inputi uchun */
+        input[type="file"] { padding: 8px; font-size: 0.8rem; color: #64748b; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div class="fixed top-0 left-0 right-0 glass-nav p-4 flex items-center justify-between z-50">
+        <a href="{% url 'dashboard' %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-600 active:scale-90 transition">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h1 class="font-extrabold text-gray-800 tracking-tight">Mening Profilim</h1>
+        <div class="w-10 h-10 flex items-center justify-center text-indigo-600">
+            <i class="fas fa-cog"></i>
+        </div>
+    </div>
+
+    <div class="pt-20 px-5 space-y-6">
+
+        <div class="profile-card shadow-xl shadow-gray-200/50 p-6 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full"></div>
+            
+            <div class="relative z-10">
+                {% if request.user.profile_image %}
+                    <img src="{{ request.user.profile_image.url }}" 
+                         class="w-28 h-28 rounded-[32px] mx-auto object-cover mb-4 shadow-lg ring-4 ring-white">
+                {% else %}
+                    <div class="w-28 h-28 rounded-[32px] bg-gradient-to-tr from-indigo-500 to-purple-600 mx-auto flex items-center justify-center mb-4 shadow-lg shadow-indigo-100">
+                        <i class="fas fa-user text-white text-4xl"></i>
+                    </div>
+                {% endif %}
+
+                <h2 class="text-xl font-black text-gray-800 tracking-tight">{{ request.user.phone }}</h2>
+                
+                {% if request.user.last_seen %}
+                    <p class="text-[11px] font-bold text-gray-400 uppercase mt-1 tracking-wider">
+                        <i class="far fa-clock mr-1 text-[10px]"></i> Oxirgi kirish: {{ request.user.last_seen|date:"H:i, d-M" }}
+                    </p>
+                {% endif %}
+
+                <div class="mt-4 bg-emerald-500 text-white py-3 px-6 rounded-2xl inline-flex items-center gap-2 shadow-lg shadow-emerald-100 transform -rotate-1">
+                    <i class="fas fa-wallet"></i>
+                    <span class="font-black tracking-tight text-lg">{{ request.user.cashback_balance }} so'm</span>
+                </div>
+            </div>
+        </div>
+        <h3>Cashback yechish tarixi</h3>
+
+{% for w in request.user.withdrawals.all %}
+<div class="bg-gray-100 p-2 rounded mb-2">
+    -{{ w.amount }} so‘m <br>
+    <small>{{ w.created_at }}</small>
+</div>
+{% empty %}
+<p>Hali yechim yo‘q</p>
+{% endfor %}
+        {% with last_payment=payments.first %}
+            {% if last_payment %}
+                <div class="bg-indigo-600 rounded-3xl p-5 text-white shadow-lg shadow-indigo-100">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tools text-sm"></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-widest opacity-80">Oxirgi xizmat</span>
+                    </div>
+                    <p class="font-semibold text-sm leading-relaxed mb-2">{{ last_payment.description }}</p>
+                    <span class="text-[10px] font-bold py-1 px-2 bg-black/10 rounded-md">
+                         {{ last_payment.created_at|date:"d.m.Y | H:i" }}
+                    </span>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="bg-white rounded-[32px] shadow-sm p-6 border border-gray-100">
+            <h3 class="text-gray-800 font-extrabold mb-5 flex items-center gap-2">
+                <i class="fas fa-user-edit text-indigo-500 text-sm"></i> Ma'lumotlarni tahrirlash
+            </h3>
+            <form method="post" enctype="multipart/form-data" class="edit-form space-y-2">
+                {% csrf_token %}
+                <div class="django-inputs">
+                    {{ form.as_p }}
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full bg-gray-900 text-white py-4 rounded-2xl text-lg font-bold shadow-xl shadow-gray-200 active:scale-95 transition-all">
+                        O'zgarishlarni saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <a href="{% url 'password_change' %}"
+               class="bg-white p-4 rounded-3xl text-center border border-gray-100 shadow-sm active:scale-95 transition-all">
+                <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-700">Parol</span>
+            </a>
+
+            <a href="{% url 'dashboard' %}"
+               class="bg-white p-4 rounded-3xl text-center border border-gray-100 shadow-sm active:scale-95 transition-all">
+                <div class="w-10 h-10 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center mx-auto mb-2 text-sm">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-700">Bosh sahifa</span>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

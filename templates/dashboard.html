@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="uz">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/static/manifest.json">
+
+<link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+
+<meta name="theme-color" content="#4f46e5">
+
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+        }
+
+        .bottom-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Chiroyli soyalar */
+        .premium-card {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Scrollni yashirish */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="pb-28">
+    
+<div class="fixed top-0 left-0 right-0 glass-header px-5 py-3.5 flex justify-between items-center z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/80 shadow-[0_2px_20px_rgba(0,0,0,0.01)]">
+
+    <!-- CHAP TOMON: LOGO QISMI -->
+<div class="flex items-center">
+    <!-- Dashboardga olib boruvchi havola -->
+    <a href="{% url 'dashboard' %}" class="block active:scale-95 transition-transform duration-200">
+        
+        <!-- 
+          ⚡️ TAVSIYA: Djangoda static rasmlar {% static '...' %} orqali chaqiriladi.
+          HTML faylingizning eng tepasida {% load static %} yozilgan bo'lishi shart!
+        -->
+        <img src="/static/img/logo.png" 
+             alt="Logo" 
+             class="h-8 w-auto rounded-full object-contain min-w-[32px]" 
+             onerror="this.onerror=null; this.src='https://img.icons8.com/fluency/96/lightning-bolt.png';">
+             
+    </a>
+</div>
+
+    <!-- O'NG TOMON: ADMIN PANEL BELGISI -->
+    {% if request.user.is_staff %}
+    <div class="flex items-center gap-2">
+        <span class="bg-slate-900 text-white text-[9px] font-black uppercase px-2.5 py-1 rounded-xl tracking-[1.5px] border border-slate-800 shadow-sm shadow-slate-200">
+            Admin
+        </span>
+    </div>
+    {% endif %}
+
+</div>
+
+    <div class="pt-20 px-4 space-y-5">
+<a href="{% url 'story_view' %}" 
+   class="flex items-center gap-3 bg-white rounded-3xl px-4 py-3 shadow-sm border border-gray-100 active:scale-95 transition-all duration-300">
+
+    <!-- STORY AVATAR -->
+    <div class="relative">
+
+        <!-- ANIMATED RING -->
+        <div class="p-[3px] rounded-full bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-400 animate-pulse">
+
+            {% if admin_user.profile_image %}
+            <img src="{{ admin_user.profile_image.url }}?v={{ admin_user.id }}"
+                 class="w-16 h-16 rounded-full object-cover border-[3px] border-white shadow-lg">
+            {% else %}
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border-[3px] border-white shadow-lg">
+                <i class="fas fa-user text-white text-xl"></i>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- LIVE BADGE -->
+        <div class="absolute -bottom-1 -right-1 bg-red-500 text-white text-[8px] font-black px-2 py-[2px] rounded-full border-2 border-white shadow">
+            LIVE
+        </div>
+
+    </div>
+
+    <!-- TEXT -->
+    <div class="flex-1 min-w-0">
+
+        <div class="flex items-center gap-2">
+            <h3 class="text-sm font-black text-gray-900 tracking-tight">
+                Admin Story
+            </h3>
+
+            <span class="flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-pink-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+            </span>
+        </div>
+
+        <p class="text-[11px] text-gray-400 font-bold mt-1 uppercase tracking-wider">
+            Yangiliklar va videolar
+        </p>
+
+    </div>
+
+    <!-- ICON -->
+    <div class="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+        <i class="fas fa-play"></i>
+    </div>
+
+</a>
+        {% if request.user.is_staff %}
+<a href="{% url 'payments:admin_requests' %}" 
+   class="block bg-blue-600 text-white text-center py-3 rounded-xl font-semibold">
+   🧾 Exsonlarni tekshirish 
+</a>
+{% endif %}
+{% if request.user.is_staff %}
+<a href="{% url 'admin_random_users' %}"
+   class="block bg-purple-600 text-white text-center py-3 rounded-xl font-bold">
+    🔀 Random Users
+</a>
+{% endif %}
+        <div
+            class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[32px] p-6 text-white shadow-xl relative overflow-hidden">
+
+            <div class="relative z-10">
+                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Xush kelibsiz</p>
+                {% if not request.user.is_staff %}
+                <h2 class="text-2xl font-black mb-4">
+                    {{ request.user.full_name|default:request.user.phone }}
+                </h2>
+                {% else %}
+                <h2 class="text-2xl font-black mb-4">
+                    Admin Panel
+                </h2>
+                {% endif %}
+
+<div class="flex items-center justify-between bg-white/10 p-4 rounded-2xl backdrop-blur-md">
+
+    <!-- 🔥 FAQAT ADMINGA -->
+    {% if request.user.is_staff %}
+    <div>
+        <p class="text-[10px] uppercase font-bold opacity-60">
+            Umumiy Balans
+        </p>
+
+        <p class="text-3xl font-black">
+            {{ fund.total_amount }}
+            <span class="text-sm font-normal">so'm</span>
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- 👤 FAQAT USERGA -->
+    {% if not request.user.is_staff %}
+    <div>
+        <p class="text-[10px] uppercase font-bold opacity-60">
+            Joriy Balans
+        </p>
+
+        <p class="text-xl font-black text-emerald-400">
+            {{ request.user.cashback_balance }}
+            <span class="text-xs">so'm</span>
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- ICON -->
+    <div
+        class="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400">
+        <i class="fas fa-wallet"></i>
+    </div>
+
+</div>
+            </div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        </div>
+        <a href="{% url 'products' %}" 
+   class="block bg-blue-500 text-white text-center py-2 rounded-xl">
+   🛠 Zapchastlar
+</a>
+{% if request.user.is_staff %}
+<a href="{% url 'add_product' %}"
+   class="block bg-green-500 text-white text-center py-2 rounded-xl">
+    Zapchast qo‘shish
+</a>
+{% endif %}
+{% if request.user.is_staff %}
+<a href="{% url 'payments:withdraw_cashback' %}"
+   class="inline-flex items-center gap-2 bg-red-50 text-red-600 px-[120px] py-2.5 rounded-2xl border border-red-100 font-bold text-xs hover:bg-red-500 hover:text-white active:scale-95 transition-all duration-200 shadow-sm shadow-red-100/50">
+    <div class="w-100 h-6 bg-red-500 text-white rounded-lg flex items-center justify-center text-[10px] shadow-sm shadow-red-200">
+        <i class="fas fa-money-bill-transfer"></i>
+    </div>
+    <span>Cashback yechish</span>
+</a>
+{% endif %}
+
+{% if request.user.is_staff %}
+<a href="{% url 'debts:admin_debts' %}" 
+   class="group flex items-center justify-between bg-white p-4 rounded-[24px] border border-gray-100 shadow-sm active:scale-[0.98] transition-all duration-200">
+    
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
+            <i class="fas fa-hand-holding-dollar text-lg"></i>
+        </div>
+        
+        <div>
+            <h3 class="text-sm font-black text-gray-800 leading-none">Qarzlar</h3>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1.5">Admin boshqaruvi</p>
+        </div>
+    </div>
+
+    <div class="text-gray-300 group-hover:text-red-500 group-hover:translate-x-1 transition-all">
+        <i class="fas fa-chevron-right text-xs"></i>
+    </div>
+</a>
+{% endif %}
+        {% if request.user.is_staff %}
+        <a href="{% url 'add_story' %}"
+            class="block bg-purple-500 text-white text-center py-3 rounded-xl font-semibold">
+            ➕ Story qo‘shish
+        </a>
+        <a href="{% url 'story_view' %}" class="block bg-black text-white text-center py-2 rounded-xl">
+            📺 Story
+        </a>
+        {% endif %}
+
+
+        {% if request.user.is_staff %}
+<form method="get" class="bg-white rounded-3xl p-4 space-y-3">
+
+    <!-- 🔍 SEARCH -->
+    <div class="relative">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+
+        <input type="text"
+               name="q"
+               value="{{ query }}"
+               placeholder="Telefon, oxirgi 4 raqam yoki mashina..."
+               class="w-full bg-gray-50 border-none rounded-xl py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <!-- 🚗 MODEL FILTER -->
+    <div class="flex gap-2">
+
+        <select name="model"
+                class="flex-1 bg-gray-50 border-none rounded-xl py-3 px-4 text-sm">
+            <option value="">Barcha modellar</option>
+
+            {% for model_name in models_list %}
+                <option value="{{ model_name }}"
+                    {% if model_name == model_filter %}selected{% endif %}>
+                    {{ model_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit"
+                class="bg-indigo-600 text-white px-6 rounded-xl font-bold">
+            Qidirish
+        </button>
+
+    </div>
+
+</form>
+
+<div class="space-y-4">
+    <!-- SARLAVHA -->
+    <div class="flex items-center justify-between px-4 mb-2">
+        <h3 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-[4px]">Mijozlar Boshqaruvi</h3>
+        <div class="h-[1px] flex-1 mx-4 bg-slate-100"></div>
+        <span class="text-slate-900 font-black text-xs">{{ users|length }} ta</span>
+    </div>
+
+    {% for user in users %}
+    <a href="{% url 'admin_user_detail' user.id %}"
+       class="block bg-white rounded-[38px] p-2 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-50 active:scale-[0.96] transition-all duration-300 hover:shadow-xl hover:border-emerald-200 group">
+        
+        <div class="flex items-center p-3 gap-4">
+            <!-- TARTIB RAQAMI VA AVATAR -->
+            <div class="relative flex-shrink-0">
+                {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" class="w-16 h-16 rounded-[26px] object-cover ring-4 ring-slate-50">
+                {% else %}
+                <div class="w-16 h-16 rounded-[26px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                    <span class="text-xl font-black italic">{{ user.user_number|default:"0" }}</span>
+                </div>
+                {% endif %}
+                
+                <!-- Tartib raqami (kichik badge o'rniga vizual element) -->
+                <div class="absolute -top-2 -left-2 w-8 h-8 bg-white rounded-full shadow-md border border-slate-100 flex items-center justify-center">
+                    <span class="text-[11px] font-black text-slate-800">{{ user.user_number|default:forloop.counter }}</span>
+                </div>
+            </div>
+
+            <!-- MIJOZ MA'LUMOTLARI -->
+            <div class="flex-1 min-w-0">
+                <div class="text-[17px] font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">
+                    {{ user.phone }}
+                </div>
+                
+                <div class="flex items-center gap-2 mt-2">
+                    <!-- Keshbek Balansi -->
+                    <div class="flex items-center bg-emerald-500 text-white px-3 py-1 rounded-full shadow-sm shadow-emerald-100">
+                        <i class="fas fa-coins text-[9px] mr-1.5"></i>
+                        <span class="text-[11px] font-extrabold">{{ user.cashback_balance }}</span>
+                        <span class="ml-1 text-[8px] font-bold opacity-80 uppercase">so'm</span>
+                    </div>
+                    
+                    <!-- Oxirgi faollik -->
+                    <div class="text-slate-400 text-[10px] font-bold bg-slate-50 px-2 py-1 rounded-lg">
+                        {% if user.last_seen %}{{ user.last_seen|date:"d.m" }}{% else %}Yangi{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- O'tish tugmasi -->
+            <div class="mr-2">
+                <div class="w-11 h-11 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                    <i class="fas fa-arrow-right-long"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- MASHINALAR BO'LIMI -->
+        {% if user.cars_list %}
+        <div class="mx-3 mb-3 mt-1 p-3 bg-slate-50/50 rounded-[28px] border border-slate-100/50">
+            <div class="flex gap-3 overflow-x-auto no-scrollbar">
+                {% for car in user.cars_list %}
+                <div class="flex-shrink-0">
+                    <div class="flex items-center bg-white border-[1.5px] border-slate-900 rounded-lg px-2 py-1.5 shadow-sm h-9 min-w-[100px]">
+                        <div class="flex flex-col items-center border-r-[1.5px] border-slate-900 pr-2 mr-2 leading-none">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Flag_of_Uzbekistan.svg/20px-Flag_of_Uzbekistan.svg.png" class="w-4 mb-0.5">
+                            <span class="text-[6px] font-black text-blue-800">UZ</span>
+                        </div>
+                        <span class="text-[14px] font-black text-slate-900 font-mono tracking-widest uppercase">
+                            {{ car.plate_number }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </a>
+    {% empty %}    
+    <div class="py-20 text-center">
+        <p class="text-slate-300 font-bold uppercase tracking-widest text-xs">Mijozlar mavjud emas</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .font-mono { font-family: 'Courier New', Courier, monospace; }
+</style>
+
+
+        {% else %}
+        {% if not request.user.can_chat %}
+<a href="{% url 'payments:send_payment_request' %}"
+   class="block bg-green-500 text-white text-center py-3 rounded-xl">
+   💳 Exson uchun to‘lov qilish
+</a>
+{% else %}
+<div class="bg-green-100 text-green-700 text-center py-3 rounded-xl">
+    ✅ Chat ochilgan
+</div>
+{% endif %}
+        <div class="space-y-3">
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Mening Mashinalarim</h3>
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                {% for car in cars %}
+                <div class="flex-shrink-0 w-48 bg-white rounded-3xl p-4 premium-card">
+                    <div
+                        class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-3">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="font-black text-gray-800 truncate">{{ car.model }}</div>
+                    <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">
+                        {{ car.plate_number}}</div>
+                    <div class="mt-3 text-[10px] font-black bg-indigo-600 text-white inline-block px-2 py-1 rounded-lg">
+                        {{ car.year }} - yil
+                    </div>
+                </div>
+                {% empty %}
+                <div
+                    class="w-full bg-white rounded-3xl p-8 text-center text-gray-400 border-2 border-dashed border-gray-200">
+                    <i class="fas fa-plus-circle mb-2 text-2xl"></i>
+                    <p class="text-sm font-bold">Hali mashina yo‘q</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest ml-2">Xizmatlar Tarixi</h3>
+            {% for payment in payments %}
+            <div class="bg-white rounded-3xl p-4 premium-card flex items-center gap-4">
+                <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <i class="fas fa-file-invoice-dollar text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between">
+                        <span class="font-black text-gray-800">{{ payment.amount }} <span
+                                class="text-[10px]">so'm</span></span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">
+                            {{ payment.created_at|date:"d-M"}}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium mt-1">🛠 {{ payment.description }}</p>
+                    <div
+                        class="mt-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 inline-block px-2 py-0.5 rounded-md">
+                        +{{ payment.cashback }} cashback
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-10 bg-white rounded-3xl border border-gray-100">
+                <i class="fas fa-history mb-2 text-2xl text-gray-200 block"></i>
+                <p class="text-sm text-gray-400 font-bold">To‘lovlar tarixi mavjud emas</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bottom-nav px-6 pb-8 pt-3 flex justify-between items-center z-50">
+        <a href="{% url 'dashboard' %}" class="flex flex-col items-center gap-1 group">
+            <div class="w-12 h-8 rounded-2xl bg-indigo-600 text-white flex items-center justify-center transition-all">
+                <i class="fas fa-home"></i>
+            </div>
+            <span class="text-[10px] font-black text-indigo-600 uppercase tracking-tighter">Bosh sahifa</span>
+        </a>
+        {% if not request.user.is_staff %}
+        <a href="{% url 'add_car' %}" class="flex flex-col items-center gap-1 group text-gray-400">
+            <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
+                <i class="fas fa-car-side"></i>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-tighter">Mashina</span>
+        </a>
+        
+        {% endif %}
+  
+        <a href="{% url 'profile' %}" class="flex flex-col items-center gap-1 group text-gray-400">
+            <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-tighter">Profil</span>
+        </a>
+        {% if request.user.is_staff %}
+      <a href="{% url 'payments:add_payment' %}" 
+         class="flex flex-col items-center gap-1 group text-gray-400">
+      
+          <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
+              <i class="fas fa-plus-circle text-lg text-emerald-500"></i>
+          </div>
+      
+          <span class="text-[10px] font-bold uppercase tracking-tighter">To'lov</span>
+      </a>
+      {% endif %}
+    </nav>
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Usta - Mijoz Tafsilotlari</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="pb-10">
+
+<div class="glass-header sticky top-0 z-50 px-4 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <a href="javascript:history.back()" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 active:scale-90 transition">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-lg font-bold text-gray-800">Mijoz profili</h1>
+    </div>
+    <div class="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
+        <i class="fas fa-crown text-amber-500 text-xs"></i>
+        <span class="text-xs font-bold text-blue-700">VIP Mijoz</span>
+    </div>
+</div>
+
+<main class="p-4 space-y-5">
+
+    <div class="bg-white rounded-3xl p-5 card-shadow flex items-center gap-4">
+        <div class="relative">
+            {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" class="w-16 h-16 rounded-2xl object-cover ring-4 ring-blue-50">
+            {% else %}
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
+                    {{ user.full_name|slice:":1" }}
+                </div>
+            {% endif %}
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">{{ user.full_name }}</h2>
+            <p class="text-gray-500 text-sm"><i class="fas fa-phone-alt mr-1 text-xs"></i> {{ user.phone }}</p>
+        </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-6 text-white card-shadow relative overflow-hidden">
+        <div class="relative z-10">
+            <p class="text-indigo-100 text-sm font-medium opacity-80">Joriy Cashback balansi</p>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-4xl font-black">{{ user.cashback_balance }}</span>
+                <span class="text-indigo-200 font-medium text-sm">so'm</span>
+            </div>
+        </div>
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white opacity-10 rounded-full"></div>
+        <i class="fas fa-coins absolute right-6 top-6 text-4xl opacity-20"></i>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 card-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-car text-blue-500"></i> Mashinalari
+            </h3>
+
+            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-lg font-bold">{{ cars|length }} ta</span>
+        </div>
+        <div class="space-y-3">
+            {% for car in cars %}
+            <div class="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100">
+                <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-blue-600">
+                    <i class="fas fa-car-side"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm text-gray-800">{{ car.model }}</h4>
+                    <p class="text-[11px] text-gray-500 font-medium uppercase tracking-wider">{{ car.plate_number }} • {{ car.year }}-yil</p>
+                </div>
+            </div>
+  <a href="{% url 'delete_user' user.id %}"
+   onclick="return confirm('Haqiqatan ham ushbu foydalanuvchini tizimdan butunlay o‘chirib tashlamoqchimisiz?')"
+   class="flex items-center justify-center gap-2 w-full py-3 mt-4 rounded-2xl bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-wider hover:bg-red-500 hover:text-white active:scale-[0.97] transition-all duration-300 group">
+    
+    <!-- Ikonka animatsiyasi bilan -->
+    <i class="fas fa-trash-alt text-[10px] group-hover:animate-bounce"></i>
+    
+    <span>Foydalanuvchini o‘chirish</span>
+</a>
+            {% empty %}
+            <p class="text-center py-4 text-gray-400 text-sm italic">Hali mashina qo‘shilmagan</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 card-shadow">
+        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-purple-500"></i> Cashback tarixi
+        </h3>
+        <div class="relative h-64 w-full">
+            <canvas id="cashbackChart"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 card-shadow">
+        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-history text-emerald-500"></i> So'nggi to'lovlar
+        </h3>
+        <div class="space-y-4">
+            {% for payment in payments %}
+            <div class="relative pl-6 border-l-2 border-dashed border-gray-100 last:border-0 pb-2">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-4 border-emerald-400"></div>
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-sm font-bold text-gray-800">{{ payment.amount }} so'm</span>
+                    <span class="text-[10px] text-gray-400 uppercase font-bold">{{ payment.created_at|date:"d.m.Y" }}</span>
+                </div>
+                <div class="bg-emerald-50 inline-block px-2 py-0.5 rounded text-[11px] font-bold text-emerald-600">
+                    +{{ payment.cashback }} cashback
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-6 text-gray-400 text-sm italic">
+                <i class="fas fa-receipt mb-2 text-2xl block opacity-20"></i>
+                Hali to‘lov qilinmagan
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</main>
+
+<script>
+const ctx = document.getElementById('cashbackChart');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ history_labels|safe }},
+        datasets: [{
+            data: {{ history_data|safe }},
+            backgroundColor: [
+                '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b'
+            ],
+            hoverOffset: 10,
+            borderWidth: 0,
+            borderRadius: 10
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                    font: { size: 11, weight: 'bold' }
+                }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

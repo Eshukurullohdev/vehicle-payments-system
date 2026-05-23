@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>To'lovni tasdiqlash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background-color: #f5f3ff;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="pb-10">
+<a href="{% url 'dashboard' %}" 
+           class="block w-full bg-slate-50 text-slate-500 text-center py-3.5 rounded-[22px] font-bold text-xs uppercase tracking-wider border border-slate-100 hover:bg-slate-100 hover:text-slate-700 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2">
+            <i class="fas fa-house text-[11px] opacity-70"></i>
+            <span>Dashboardga qaytish</span>
+        </a>
+    <div class="fixed top-0 left-0 right-0 glass-header p-4 flex items-center justify-between z-50">
+        <a href="{% url 'dashboard' %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-600 active:scale-90 transition">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h1 class="font-extrabold text-gray-800 tracking-tight text-center flex-1">To'lovni tasdiqlash</h1>
+        <div class="w-10"></div>
+    </div>
+
+    <main class="pt-24 px-5 max-w-md mx-auto">
+        
+        <div class="bg-indigo-600 rounded-[32px] p-6 mb-8 text-white shadow-xl shadow-indigo-100 flex items-center justify-between">
+<div>
+    <p class="text-indigo-200 text-[10px] font-bold uppercase tracking-widest mb-1">
+        Ehson summasi
+    </p>
+    <p class="text-2xl font-black">
+        💗 <span class="text-sm font-normal">so'm</span>
+    </p>
+    <p class="text-indigo-100 text-xs mt-1">
+        Sizning ehsoningiz kimningdir hayotiga nur olib kiradi 🤍
+    </p>
+</div>
+            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                <i class="fas fa-receipt text-xl"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-7 border border-gray-50">
+            <h2 class="text-lg font-bold text-gray-800 mb-2">Chekni yuklang</h2>
+            <p class="text-xs text-gray-400 mb-6 font-medium">Exson To'lov screenshotini tanlang yoki shu yerga tashlang</p>
+
+            <form method="post" enctype="multipart/form-data" id="payment-form">
+                {% csrf_token %}
+
+                <div id="drop-zone" class="upload-area rounded-[24px] p-8 text-center cursor-pointer mb-6 relative overflow-hidden">
+                    <input type="file" name="screenshot" id="file-input" required accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    
+                    <div id="upload-placeholder">
+                        <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-500">
+                            <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-gray-600">Rasm tanlash</p>
+                        <p class="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-tighter">PNG, JPG yoki JPEG</p>
+                    </div>
+
+                    <div id="preview-container" class="hidden">
+                        <img id="image-preview" src="#" alt="Preview" class="mx-auto rounded-xl max-h-48 shadow-md">
+                        <p class="mt-3 text-xs text-indigo-600 font-bold" id="file-name"></p>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg shadow-gray-200 active:scale-[0.97] transition-all duration-200 text-lg flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane text-sm opacity-60"></i> Chekni yuborish
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-8 flex items-center justify-center gap-3 opacity-40">
+            <i class="fas fa-shield-alt text-xs"></i>
+            <span class="text-[10px] font-bold uppercase tracking-widest">Xavfsiz to'lov tizimi</span>
+        </div>
+
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const placeholder = document.getElementById('upload-placeholder');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('image-preview');
+        const fileNameLabel = document.getElementById('file-name');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    placeholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    fileNameLabel.textContent = file.name;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and Drop efektlari
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+    </script>
+
+</body>
+</html>

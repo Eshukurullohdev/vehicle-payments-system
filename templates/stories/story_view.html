@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stories View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body { background: black; overflow: hidden; touch-action: none; }
+        .progress-bar { width: 0%; height: 3px; background: white; transition: width 5s linear; }
+        .paused { transition: none !important; } /* To'xtatish uchun */
+        
+        /* Modal animatsiyasi */
+        #viewersModal { transition: opacity 0.3s ease; }
+        .modal-content { transform: translateY(100%); transition: transform 0.3s ease-out; }
+        #viewersModal.flex .modal-content { transform: translateY(0); }
+    </style>
+</head>
+
+<body class="text-white select-none">
+
+<div class="relative h-screen max-w-md mx-auto bg-black overflow-hidden shadow-2xl">
+
+    <div class="absolute top-0 w-full flex space-x-1 p-2 z-50">
+        {% for story in stories %}
+        <div class="flex-1 bg-white/30 rounded-full overflow-hidden">
+            <div class="progress-bar" id="bar-{{ forloop.counter0 }}"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="absolute top-6 w-full px-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px]">
+                <div class="w-full h-full rounded-full bg-black flex items-center justify-center border border-black">
+                    <i class="fas fa-user text-[10px]"></i>
+                </div>
+            </div>
+            <span class="text-xs font-bold shadow-sm">{{ request.user.phone }}</span>
+        </div>
+        <a href="{% url 'dashboard' %}" class="w-8 h-8 flex items-center justify-center bg-black/20 rounded-full backdrop-blur-md">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+
+    {% for story in stories %}
+    <div class="story hidden absolute inset-0" data-id="{{ story.id }}">
+        {% if story.image %}
+            <img src="{{ story.image.url }}" class="w-full h-full object-cover">
+        {% elif story.video %}
+            <video class="w-full h-full object-cover" id="video-{{ forloop.counter0 }}"  playsinline>
+                <source src="{{ story.video.url }}">
+            </video>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40"></div>
+    </div>
+    {% endfor %}
+
+    <div class="absolute inset-0 flex z-40">
+        <div class="w-1/3" id="prev"></div>
+        <div class="w-2/3" id="next"></div>
+    </div>
+
+    {% if request.user.is_staff %}
+    <div class="absolute bottom-10 left-0 right-0 flex justify-center z-50">
+        <button onclick="openViewers()" class="flex flex-col items-center gap-1 group">
+            <div class="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20 group-active:scale-90 transition">
+                <i class="fas fa-eye text-sm"></i>
+            </div>
+            <span class="text-[10px] font-bold opacity-80 uppercase tracking-widest">Ko‘rganlar</span>
+        </button>
+    </div>
+    {% endif %}
+
+</div>
+
+<div id="viewersModal" class="fixed inset-0 bg-black/60 hidden items-end z-[999] backdrop-blur-sm">
+    <div class="modal-content bg-white text-black w-full rounded-t-[32px] max-h-[70vh] flex flex-col shadow-2xl">
+        
+        <div class="p-4 border-b flex flex-col items-center">
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full mb-4"></div>
+            <h2 class="text-lg font-black tracking-tight">Ko‘rganlar</h2>
+        </div>
+
+        <div id="viewersList" class="overflow-y-auto p-4 space-y-4 no-scrollbar flex-1">
+            </div>
+
+        <div class="p-4 pb-8">
+            <button onclick="closeViewers()" class="w-full bg-gray-100 py-4 rounded-2xl font-bold text-gray-500 active:scale-95 transition">
+                Yopish
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let stories = document.querySelectorAll('.story')
+let bars = document.querySelectorAll('.progress-bar')
+
+let current = 0
+let timer = null
+let currentDuration = 5000
+
+function markViewed(storyId) {
+    fetch(`/stories/view/${storyId}/`)
+}
+
+function resetBars() {
+    bars.forEach(bar => {
+        bar.style.transition = 'none'
+        bar.style.width = '0%'
+    })
+}
+
+function stopAllVideos() {
+    document.querySelectorAll('video').forEach(v => {
+        v.pause()
+        v.currentTime = 0
+    })
+}
+
+function showStory(index) {
+
+    clearTimeout(timer)
+
+    stories.forEach(s => s.classList.add('hidden'))
+
+    let story = stories[index]
+    story.classList.remove('hidden')
+
+    let storyId = story.getAttribute('data-id')
+
+    markViewed(storyId)
+
+    resetBars()
+
+    for (let i = 0; i < index; i++) {
+        bars[i].style.width = '100%'
+    }
+
+    stopAllVideos()
+
+    let video = document.getElementById(`video-${index}`)
+
+    // 🔥 AGAR VIDEO BO‘LSA
+    if (video) {
+
+        video.muted = false
+        video.volume = 1
+
+        video.play()
+
+        // 🔥 VIDEO duration olish
+        video.onloadedmetadata = () => {
+
+            currentDuration = video.duration * 1000
+
+            bars[index].style.transition = `width ${video.duration}s linear`
+
+            setTimeout(() => {
+                bars[index].style.width = '100%'
+            }, 50)
+
+            timer = setTimeout(() => {
+                nextStory()
+            }, currentDuration)
+
+        }
+
+    } else {
+
+        // 🔥 RASM UCHUN 5 SECOND
+        currentDuration = 5000
+
+        bars[index].style.transition = 'width 5s linear'
+
+        setTimeout(() => {
+            bars[index].style.width = '100%'
+        }, 50)
+
+        timer = setTimeout(() => {
+            nextStory()
+        }, currentDuration)
+    }
+}
+
+function nextStory() {
+
+    if (current < stories.length - 1) {
+
+        current++
+        showStory(current)
+
+    } else {
+
+        window.location.href = "{% url 'dashboard' %}"
+    }
+}
+
+function prevStory() {
+
+    if (current > 0) {
+
+        current--
+        showStory(current)
+    }
+}
+
+document.getElementById('next').onclick = nextStory
+document.getElementById('prev').onclick = prevStory
+
+// 🔥 STORY BOSHLASH
+showStory(current)
+
+function openViewers() {
+    isPaused = true
+    clearTimeout(timer)
+    
+    // Progress barni muzlatish
+    let currentBar = bars[current]
+    let computedStyle = window.getComputedStyle(currentBar)
+    currentBar.style.width = computedStyle.width
+    currentBar.classList.add('paused')
+
+    // Video bo'lsa to'xtatish
+    let video = document.getElementById(`video-${current}`)
+    if (video) video.pause()
+
+    let id = stories[current].getAttribute('data-id')
+    fetch(`/stories/viewers/${id}/`)
+    .then(res => res.json())
+    .then(data => {
+        let list = document.getElementById('viewersList')
+        list.innerHTML = ""
+
+        if (data.viewers.length === 0) {
+            list.innerHTML = `<div class="text-gray-400 text-center py-10 font-bold">Hali hech kim ko‘rmadi</div>`
+        } else {
+            data.viewers.forEach(v => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center border border-gray-100">
+                                <i class="fas fa-user text-gray-300"></i>
+                            </div>
+                            <span class="font-bold text-gray-800">${v.phone}</span>
+                        </div>
+                        <i class="fas fa-check-circle text-blue-500 text-xs"></i>
+                    </div>`
+            })
+        }
+        document.getElementById('viewersModal').classList.remove('hidden')
+        document.getElementById('viewersModal').classList.add('flex')
+    })
+}
+
+function closeViewers() {
+    document.getElementById('viewersModal').classList.add('hidden')
+    document.getElementById('viewersModal').classList.remove('flex')
+    
+    // Davom ettirish (oddiy usulda hozircha storyni qayta yuklaymiz)
+    showStory(current) 
+}
+
+document.getElementById('next').onclick = nextStory
+document.getElementById('prev').onclick = prevStory
+
+showStory(current)
+</script>
+
+</body>
+</html>
