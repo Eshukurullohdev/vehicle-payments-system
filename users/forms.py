@@ -42,6 +42,9 @@ CAR_MODELS = [
     ("BMW 5 Series", "BMW 5 Series"),
     ("Mercedes E Class", "Mercedes E Class"),
 ]
+YEAR_CHOICES = [
+    (year, year) for year in range(2026, 1980, -1)
+]
 
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(
@@ -58,9 +61,10 @@ class UserRegisterForm(forms.ModelForm):
         })
     )
 
-    car_year = forms.IntegerField(
+    car_year = forms.ChoiceField(
+        choices=YEAR_CHOICES,
         label="Yili",
-        widget=forms.NumberInput(attrs={
+        widget=forms.Select(attrs={
             "placeholder": "2020"
         })
     )

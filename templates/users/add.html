@@ -2,134 +2,74 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ehtiyot qism qo‘shish</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        
-        .premium-input {
-            background-color: #f1f5f9;
+        body { font-family: sans-serif; background: #f8fafc; }
+
+        .input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            background: #f1f5f9;
             border: 2px solid transparent;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            outline: none;
         }
-        .premium-input:focus {
-            background-color: #fff;
+
+        .input:focus {
+            background: white;
             border-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
         }
-        .image-drop-zone {
-            border: 2px dashed #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        .image-drop-zone.active {
-            border-color: #10b981;
-            background-color: #f0fdf4;
+
+        select.input {
+            appearance: none;
         }
     </style>
 </head>
-<body class="p-4 pb-12">
 
-<div class="max-w-md mx-auto space-y-6">
+<body class="p-4">
 
-    <div class="flex items-center justify-between px-1">
-        <div>
-            <h1 class="text-2xl font-black text-gray-900 tracking-tight">Ehtiyot qism</h1>
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">E’lon qo‘shish paneli</p>
-        </div>
-        <div class="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shadow-sm">
-            <i class="fas fa-tools text-xl"></i>
-        </div>
-    </div>
+<div class="max-w-md mx-auto">
 
-    <div class="bg-white p-7 rounded-[32px] shadow-xl shadow-gray-200/50 border border-gray-50">
-        <form method="post" enctype="multipart/form-data" class="space-y-4">
-            {% csrf_token %}
+    <h1 class="text-2xl font-black mb-6">Ehtiyot qism qo‘shish</h1>
 
-            <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-wider">Mahsulot nomi</label>
-                <input type="text" name="name" required
-                       class="w-full premium-input p-4 rounded-2xl text-sm font-bold outline-none" 
-                       placeholder="Masalan: Chevrolet Cobalt fara">
-            </div>
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-wider">Narxi (so‘m)</label>
-                    
-                           <input class="w-full premium-input p-4 rounded-2xl text-sm font-bold outline-none"  type="text" name="price" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-wider">Aloqa</label>
-                    <input type="text" name="phone" required
-                           class="w-full premium-input p-4 rounded-2xl text-sm font-bold outline-none" 
-                           placeholder="+998">
-                </div>
-            </div>
+        <input type="text" name="name" placeholder="Mahsulot nomi" class="input" required>
 
-            <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-gray-400 uppercase ml-1 tracking-wider">Mahsulot rasmi</label>
-                <div id="drop-zone" class="image-drop-zone relative rounded-[24px] p-6 text-center cursor-pointer overflow-hidden">
-                    <input type="file" name="image" id="file-input" required accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
-                    
-                    <div id="upload-content">
-                        <div class="w-12 h-12 bg-white shadow-sm rounded-xl flex items-center justify-center mx-auto mb-3 text-emerald-500">
-                            <i class="fas fa-camera text-lg"></i>
-                        </div>
-                        <p class="text-xs font-bold text-gray-500">Rasm tanlang</p>
-                    </div>
+        <!-- CATEGORY FIXED -->
+        <select name="category" class="input" required>
+            <option value="">Kategoriya tanlang</option>
+            <option value="engine">Motor</option>
+            <option value="electric">Elektrika</option>
+            <option value="body">Kuzov</option>
+            <option value="suspension">Podveska</option>
+            <option value="brake">Tormoz</option>
+            <option value="oil">Moy</option>
+            <option value="other">Boshqa</option>
+        </select>
 
-                    <div id="preview-container" class="hidden">
-                        <img id="image-preview" src="#" class="mx-auto h-32 rounded-xl object-cover shadow-md border-2 border-white">
-                        <button type="button" id="remove-img" class="mt-2 text-[10px] font-black text-red-500 uppercase tracking-tighter">O‘chirish</button>
-                    </div>
-                </div>
-            </div>
+        <input type="text" name="price" placeholder="Narx" class="input" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
 
-            <button class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black text-sm shadow-lg shadow-emerald-100 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4">
-                <i class="fas fa-plus-circle opacity-50"></i> E’LONNI JOYLASHTIRISH
-            </button>
-        </form>
-    </div>
+        <input type="text" name="phone" placeholder="+998..." class="input" required>
 
-    <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 flex items-start gap-3">
-        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-        <p class="text-[10px] text-blue-700 font-bold leading-relaxed uppercase tracking-tight">
-            E’loningiz tekshiruvdan o‘tgach, asosiy katalogda ko‘rinadi. Sifatli rasm ko‘proq mijoz jalb qiladi.
-        </p>
-    </div>
+        <input type="file" name="image" class="input" required>
+
+        <textarea name="description" placeholder="Izoh" class="input"></textarea>
+
+        <button class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black">
+            Qo‘shish
+        </button>
+
+    </form>
 
 </div>
-
-<script>
-    const fileInput = document.getElementById('file-input');
-    const uploadContent = document.getElementById('upload-content');
-    const previewContainer = document.getElementById('preview-container');
-    const imagePreview = document.getElementById('image-preview');
-    const removeImg = document.getElementById('remove-img');
-
-    fileInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                uploadContent.classList.add('hidden');
-                previewContainer.classList.remove('hidden');
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-
-    removeImg.addEventListener('click', function(e) {
-        e.stopPropagation();
-        fileInput.value = '';
-        uploadContent.classList.remove('hidden');
-        previewContainer.classList.add('hidden');
-    });
-</script>
 
 </body>
 </html>

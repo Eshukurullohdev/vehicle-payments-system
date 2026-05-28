@@ -1,6 +1,12 @@
 from django.urls import path
-from .views import dashboard_view
+from .views import dashboard_view, splash_view
 
 urlpatterns = [
-    path('', dashboard_view, name='dashboard'),
+
+    # 🔥 SPLASH
+    path('', splash_view, name='splash'),
+
+    # 🏠 DASHBOARD
+    path('dashboard/', dashboard_view, name='dashboard'),
+
 ]

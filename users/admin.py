@@ -3,8 +3,14 @@ from .models import User,  Product
 
 
 admin.site.register(User)
+
+
+
+
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'phone', 'is_sold', 'created_at')
-    list_filter = ('is_sold',)
+    list_display = ('name', 'category', 'price', 'is_sold', 'created_at')
+    list_filter = ('category', 'is_sold')
     search_fields = ('name', 'phone')

@@ -160,28 +160,39 @@ def safe_decimal(value):
 
 # 📦 PRODUCT LIST
 def product_list(request):
+
+    category = request.GET.get('category')
+
     products = Product.objects.all().order_by('-id')
 
+    if category:
+        products = products.filter(category=category)
+
     return render(request, 'users/list.html', {
-        'products': products
+        'products': products,
+        'category': category
     })
 
 
 # ➕ ADD PRODUCT
 @staff_member_required
+@staff_member_required
 def add_product(request):
+
     if request.method == "POST":
+
         Product.objects.create(
             name=request.POST.get('name'),
             price=safe_decimal(request.POST.get('price')),
             phone=request.POST.get('phone'),
-            image=request.FILES.get('image')
+            image=request.FILES.get('image'),
+            category=request.POST.get('category'),  # 🔥 MUHIM
+            description=request.POST.get('description')
         )
 
         return redirect('products')
 
     return render(request, 'users/add.html')
-
 
 # ✏️ EDIT PRODUCT
 @staff_member_required

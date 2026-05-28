@@ -52,17 +52,34 @@
 
     <!-- CHAP TOMON: LOGO QISMI -->
 <div class="flex items-center">
-    <!-- Dashboardga olib boruvchi havola -->
-    <a href="{% url 'dashboard' %}" class="block active:scale-95 transition-transform duration-200">
+    <!-- Dashboardga olib boruvchi havola va uning ichidagi brend qismi -->
+    <a href="{% url 'dashboard' %}" class="flex items-center gap-3 active:scale-[0.98] transition-transform duration-200 group">
         
-        <!-- 
-          ⚡️ TAVSIYA: Djangoda static rasmlar {% static '...' %} orqali chaqiriladi.
-          HTML faylingizning eng tepasida {% load static %} yozilgan bo'lishi shart!
-        -->
-        <img src="/static/img/logo.png" 
-             alt="Logo" 
-             class="h-8 w-auto rounded-full object-contain min-w-[32px]" 
-             onerror="this.onerror=null; this.src='https://img.icons8.com/fluency/96/lightning-bolt.png';">
+        <!-- LOGO RASMI -->
+        <div class="relative flex items-center justify-center">
+            <img src="/static/img/logo.jpg" 
+                 alt="Logo" 
+                 class="h-9 w-9 rounded-xl object-contain shadow-sm border border-slate-100/50" 
+                 onerror="this.onerror=null; this.src='https://img.icons8.com/fluency/96/lightning-bolt.png';">
+            <!-- Neon chaqmoq effektli kichik nuqta (Jonli ko'rinish berish uchun) -->
+            <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+        </div>
+
+        <!-- BREND NOMI VA TELEFON RAQAMI -->
+        <div class="flex flex-col text-left justify-center">
+            <!-- Katta va qalin brend nomi -->
+            <span class="text-sm font-black text-slate-800 tracking-tight leading-none group-hover:text-indigo-600 transition-colors">
+                Elektrikjan
+            </span>
+            <!-- Kichik, toza va aniq yozilgan telefon raqami -->
+            <span class="text-[10px] font-bold text-slate-400 font-mono mt-1 tracking-wide flex items-center gap-1 leading-none">
+                <i class="fas fa-phone text-[8px] text-slate-300"></i>
+                +998 (90) 624-11-22
+            </span>
+        </div>
              
     </a>
 </div>
@@ -288,6 +305,8 @@
 
 </form>
 
+
+
 <div class="space-y-4">
     <!-- SARLAVHA -->
     <div class="flex items-center justify-between px-4 mb-2">
@@ -311,7 +330,7 @@
                 </div>
                 {% endif %}
                 
-                <!-- Tartib raqami (kichik badge o'rniga vizual element) -->
+                <!-- Tartib raqami -->
                 <div class="absolute -top-2 -left-2 w-8 h-8 bg-white rounded-full shadow-md border border-slate-100 flex items-center justify-center">
                     <span class="text-[11px] font-black text-slate-800">{{ user.user_number|default:forloop.counter }}</span>
                 </div>
@@ -319,7 +338,8 @@
 
             <!-- MIJOZ MA'LUMOTLARI -->
             <div class="flex-1 min-w-0">
-                <div class="text-[17px] font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors">
+                <!-- Telefon raqami professional monoshreftda -->
+                <div class="text-[17px] font-black text-slate-900 tracking-tight group-hover:text-emerald-600 transition-colors font-mono">
                     {{ user.phone }}
                 </div>
                 
@@ -327,13 +347,34 @@
                     <!-- Keshbek Balansi -->
                     <div class="flex items-center bg-emerald-500 text-white px-3 py-1 rounded-full shadow-sm shadow-emerald-100">
                         <i class="fas fa-coins text-[9px] mr-1.5"></i>
-                        <span class="text-[11px] font-extrabold">{{ user.cashback_balance }}</span>
+                        <span class="text-[11px] font-extrabold font-mono">{{ user.cashback_balance }}</span>
                         <span class="ml-1 text-[8px] font-bold opacity-80 uppercase">so'm</span>
                     </div>
                     
-                    <!-- Oxirgi faollik -->
-                    <div class="text-slate-400 text-[10px] font-bold bg-slate-50 px-2 py-1 rounded-lg">
-                        {% if user.last_seen %}{{ user.last_seen|date:"d.m" }}{% else %}Yangi{% endif %}
+                    <!-- Sifatli Oxirgi faollik (Telegram uslubida natural vaqt) -->
+                    <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-100/80 px-2.5 py-1 rounded-xl">
+                        {% if user.last_seen %}
+                            <!-- Tarmoqda bo'lgan aniq vaqti -->
+                            <i class="far fa-clock text-[10px] text-slate-400"></i>
+                            <span class="text-[10px] font-bold text-slate-500 font-mono">
+                                {% if user.last_seen.date == today %}
+                                    Bugun, {{ user.last_seen|date:"H:i" }}
+                                {% elif user.last_seen.date == yesterday %}
+                                    Kecha, {{ user.last_seen|date:"H:i" }}
+                                {% else %}
+                                    {{ user.last_seen|date:"d.m.Y H:i" }}
+                                {% endif %}
+                            </span>
+                        {% else %}
+                            <!-- Yangi kelgan userlar uchun yashil pulsatsiya -->
+                            <span class="flex h-1.5 w-1.5 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                            </span>
+                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-wide">
+                                Yangi
+                            </span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -349,17 +390,28 @@
         <!-- MASHINALAR BO'LIMI -->
         {% if user.cars_list %}
         <div class="mx-3 mb-3 mt-1 p-3 bg-slate-50/50 rounded-[28px] border border-slate-100/50">
-            <div class="flex gap-3 overflow-x-auto no-scrollbar">
+            <!-- no-scrollbar klassi orqali xunuk skrol chizig'i yo'qotildi, lekin surish ishlaydi -->
+            <div class="flex gap-3 overflow-x-auto scroll-smooth no-scrollbar">
                 {% for car in user.cars_list %}
                 <div class="flex-shrink-0">
-                    <div class="flex items-center bg-white border-[1.5px] border-slate-900 rounded-lg px-2 py-1.5 shadow-sm h-9 min-w-[100px]">
+                    <div class="flex items-center bg-white border-[1.5px] border-slate-900 rounded-lg px-2.5 py-1.5 shadow-sm h-9 min-w-[125px]">
+                        
+                        <!-- Davlat ramzi qismi -->
                         <div class="flex flex-col items-center border-r-[1.5px] border-slate-900 pr-2 mr-2 leading-none">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Flag_of_Uzbekistan.svg/20px-Flag_of_Uzbekistan.svg.png" class="w-4 mb-0.5">
                             <span class="text-[6px] font-black text-blue-800">UZ</span>
                         </div>
-                        <span class="text-[14px] font-black text-slate-900 font-mono tracking-widest uppercase">
-                            {{ car.plate_number }}
-                        </span>
+                        
+                        <!-- Nomer va Model (Premium Shriftdagi Vizual) -->
+                        <div class="flex flex-col leading-none text-left">
+                            <span class="text-[14px] font-black text-slate-900 font-mono tracking-widest uppercase">
+                                {{ car.plate_number }}
+                            </span>
+                            <span class="text-[8px] font-extrabold text-slate-400 mt-1 uppercase tracking-wider">
+                                {{ car.model }}
+                            </span>
+                        </div>
+
                     </div>
                 </div>
                 {% endfor %}
@@ -368,16 +420,16 @@
         {% endif %}
     </a>
     {% empty %}    
-    <div class="py-20 text-center">
+    <div class="py-20 text-center border-2 border-dashed border-slate-100 rounded-[38px]">
         <p class="text-slate-300 font-bold uppercase tracking-widest text-xs">Mijozlar mavjud emas</p>
     </div>
     {% endfor %}
 </div>
 
+<!-- 🛠 YORDAMChI STIL: Yon tomonga o'tadigan skrol chizig'ini butunlay yashirish -->
 <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .font-mono { font-family: 'Courier New', Courier, monospace; }
 </style>
 
 
@@ -385,7 +437,7 @@
         {% if not request.user.can_chat %}
 <a href="{% url 'payments:send_payment_request' %}"
    class="block bg-green-500 text-white text-center py-3 rounded-xl">
-   💳 Exson uchun to‘lov qilish
+   💳 Danat uchun to‘lov qilish
 </a>
 {% else %}
 <div class="bg-green-100 text-green-700 text-center py-3 rounded-xl">
@@ -449,42 +501,49 @@
         {% endif %}
 
     </div>
+<nav class="fixed bottom-0 left-0 right-0 px-6 pb-6 pt-3 flex justify-between items-center z-50 bg-white/80 backdrop-blur-xl border-t border-slate-100/80 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+    
+    <!-- 1. BOSH SAHIFA -->
+    <a href="{% url 'dashboard' %}" class="flex flex-col items-center gap-1.5 group flex-1">
+        <div class="w-12 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center transition-all duration-300 shadow-md shadow-indigo-100 active:scale-90">
+            <i class="fas fa-home text-sm"></i>
+        </div>
+        <span class="text-[9px] font-black text-indigo-600 uppercase tracking-wider font-sans">Bosh sahifa</span>
+    </a>
 
-    <nav class="fixed bottom-0 left-0 right-0 bottom-nav px-6 pb-8 pt-3 flex justify-between items-center z-50">
-        <a href="{% url 'dashboard' %}" class="flex flex-col items-center gap-1 group">
-            <div class="w-12 h-8 rounded-2xl bg-indigo-600 text-white flex items-center justify-center transition-all">
-                <i class="fas fa-home"></i>
-            </div>
-            <span class="text-[10px] font-black text-indigo-600 uppercase tracking-tighter">Bosh sahifa</span>
-        </a>
-        {% if not request.user.is_staff %}
-        <a href="{% url 'add_car' %}" class="flex flex-col items-center gap-1 group text-gray-400">
-            <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
-                <i class="fas fa-car-side"></i>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-tighter">Mashina</span>
-        </a>
-        
-        {% endif %}
-  
-        <a href="{% url 'profile' %}" class="flex flex-col items-center gap-1 group text-gray-400">
-            <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
-                <i class="fas fa-user-circle"></i>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-tighter">Profil</span>
-        </a>
-        {% if request.user.is_staff %}
-      <a href="{% url 'payments:add_payment' %}" 
-         class="flex flex-col items-center gap-1 group text-gray-400">
-      
-          <div class="w-12 h-8 rounded-2xl flex items-center justify-center transition-all group-hover:bg-gray-100">
-              <i class="fas fa-plus-circle text-lg text-emerald-500"></i>
-          </div>
-      
-          <span class="text-[10px] font-bold uppercase tracking-tighter">To'lov</span>
-      </a>
-      {% endif %}
-    </nav>
+    <!-- 2. MASHINA VA ZAPCHASTLAR (ODDDIY FOYDALANUVCHILAR UCHUN) -->
+    {% if not request.user.is_staff %}
+    <a href="{% url 'products' %}" class="flex flex-col items-center gap-1.5 group flex-1 text-slate-400 hover:text-slate-800 transition-colors">
+        <div class="w-12 h-8 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:bg-slate-50 group-active:scale-90 relative">
+            <!-- Mashina va Zapchast uyg'unligi uchun asbob (wrench) va mashina aralashgan premium ikonka -->
+            <i class="fas fa-screwdriver-wrench text-sm group-hover:text-indigo-600 transition-colors"></i>
+            
+            <!-- Zapchast qo'shilganini bildiruvchi kichik qizil/binafsha nuqtacha (Notification nuqtasi) -->
+            <span class="absolute top-1 right-2 w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+        </div>
+        <span class="text-[9px] font-bold uppercase tracking-wider font-sans">Zapchastlar</span>
+    </a>
+    {% endif %}
+
+    <!-- 3. TO'LOV QO'SHISH (FAQAT ADMIN/STAFF UCHUN) -->
+    {% if request.user.is_staff %}
+    <a href="{% url 'payments:add_payment' %}" class="flex flex-col items-center gap-1.5 group flex-1 text-slate-400 hover:text-slate-800 transition-colors">
+        <div class="w-12 h-8 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-50 group-active:scale-90">
+            <i class="fas fa-circle-plus text-base text-emerald-500 group-hover:scale-110 transition-transform"></i>
+        </div>
+        <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-wider font-sans">To'lov</span>
+    </a>
+    {% endif %}
+
+    <!-- 4. PROFIL -->
+    <a href="{% url 'profile' %}" class="flex flex-col items-center gap-1.5 group flex-1 text-slate-400 hover:text-slate-800 transition-colors">
+        <div class="w-12 h-8 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:bg-slate-50 group-active:scale-90">
+            <i class="fas fa-user-gear text-sm group-hover:text-indigo-600 transition-colors"></i>
+        </div>
+        <span class="text-[9px] font-bold uppercase tracking-wider font-sans">Profil</span>
+    </a>
+
+</nav>
 </body>
 
 </html>

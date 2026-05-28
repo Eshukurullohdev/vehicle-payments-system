@@ -21,24 +21,12 @@ class UserManager(BaseUserManager):
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from decimal import Decimal
-
 class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=20, unique=True)
 
-    # 🔥 USER RAQAMI
-    user_number = models.PositiveIntegerField(
-        unique=True,
-        null=True,
-        blank=True
-    )
+    user_number = models.PositiveIntegerField(null=True, blank=True, unique=True)
 
-
-
-    cashback_balance = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0
-    )
+    cashback_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     full_name = models.CharField(max_length=100, blank=True, null=True)
     profile_image = models.ImageField(upload_to='profiles/', blank=True, null=True)
@@ -54,34 +42,27 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
 
-def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
 
-    # 🔥 faqat oddiy userlarga raqam
-    if not self.user_number and not self.is_staff:
+        # 🔥 user_number berish logikasi
+        if not self.user_number and not self.is_staff:
 
-        existing_numbers = User.objects.filter(
-            is_staff=False
-        ).values_list(
-            'user_number',
-            flat=True
-        )
+            existing_numbers = User.objects.filter(
+                is_staff=False
+            ).values_list('user_number', flat=True)
 
-        existing_numbers = sorted([
-            n for n in existing_numbers if n
-        ])
+            existing_numbers = sorted([n for n in existing_numbers if n])
 
-        next_number = 1
+            next_number = 1
+            for number in existing_numbers:
+                if number == next_number:
+                    next_number += 1
+                else:
+                    break
 
-        for number in existing_numbers:
+            self.user_number = next_number
 
-            if number == next_number:
-                next_number += 1
-            else:
-                break
-
-        self.user_number = next_number
-
-    super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def add_cashback(self, amount):
         self.cashback_balance += Decimal(amount)
@@ -92,20 +73,54 @@ def save(self, *args, **kwargs):
 
 
 from django.db import models
+from django.db import models
+from django.core.validators import MinValueValidator
+
+
+from django.db import models
+from decimal import Decimal
+from django.core.validators import MinValueValidator
+
 
 class Product(models.Model):
+
+    # 🧩 CATEGORY
+    CATEGORY_CHOICES = [
+        ('engine', 'Motor Xadavoy'),
+        ('electric', 'Elektrika'),
+        ('body', 'Kuzov'),
+        ('suspension', 'Podveska'),
+        ('brake', 'Tormoz'),
+        ('oil', 'Moy va filtrlar'),
+        ('kuzuf', 'Kuzuf'),
+        ('accessory', 'Avto bezak'),
+        ('aralash', 'Aralash'),
+        ('other', 'Boshqa'),
+    ]
+
     image = models.ImageField(upload_to='products/', null=True, blank=True)
-    description = models.TextField(blank=True)
     name = models.CharField(max_length=255)
+
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='other'
+    )
+
+    description = models.TextField(blank=True)
+
     price = models.DecimalField(
-    max_digits=10,
-    decimal_places=2,
-    default=0,
-    validators=[MinValueValidator(0)]
-)
-    is_sold = models.BooleanField(default=False)
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        validators=[MinValueValidator(0)]
+    )
+
     phone = models.CharField(max_length=20, blank=True)
+
+    is_sold = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.category}"

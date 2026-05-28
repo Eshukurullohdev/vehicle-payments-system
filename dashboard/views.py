@@ -107,3 +107,6 @@ def dashboard_view(request):
             'fund': fund,
             'admin_user': admin_user,  # 🔥 USERLARGA HAM YUBORILYAPTI
         })
+
+def splash_view(request):
+    return render(request, 'splash.html')

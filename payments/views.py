@@ -6,9 +6,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
-
 from .models import CashbackWithdraw
-
 User = get_user_model()
 @login_required
 def add_payment_view(request):
